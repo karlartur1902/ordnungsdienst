@@ -69,6 +69,20 @@
   font-size: 1.05rem;
 }
 .announce ul { margin: 8px 0 0 20px; }
+.service-card { border-color:#e6e6e6; }
+.service-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; }
+.service-title { font-size:1.05rem; font-weight:700; margin:0; }
+.service-sub { color:#555; font-size:0.95rem; margin-top:4px; }
+.service-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px 14px; margin-top:12px; }
+.service-name {
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:1.05rem;
+}
+.service-foot { margin-top:12px; color:#555; font-size:0.9rem; }
+.kv { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.kv .badge { font-size:0.85rem; }
 
   </style>
 </head>
@@ -166,9 +180,27 @@ async function main() {
     
 
   } catch {
-    dienstCard.innerHTML = `<div class="err">Fehler: Server hat kein JSON geliefert.</div>
-      <div class="muted" style="margin-top:8px">Anfang der Antwort:</div>
-      <pre style="white-space:pre-wrap">${text.slice(0, 400).replaceAll("<","&lt;")}</pre>`;
+    const start = formatLongDate(d.monday);
+const end = d.friday ? formatLongDate(d.friday) : "";
+const range = end ? `${start} – ${end}` : start;
+
+dienstCard.className = "card service-card";
+dienstCard.innerHTML = `
+  <div class="service-head">
+    <div>
+      <div class="service-title">🧹 Ordnungsdienst</div>
+      <div class="service-sub">${range}</div>
+    </div>
+    <span class="badge badge-neutral">${d.kw}</span>
+  </div>
+
+  <div class="service-grid">
+    ${d.ordnungsdienst.map(n => `<div class="service-name"><b>${n}</b></div>`).join("")}
+  </div>
+
+  <div class="service-foot">Diese Einteilung gilt für die ganze Woche.</div>
+`;
+
     statusPill.textContent = "Fehler";
     setStatusPill(statusPill, "warn");
     return;
@@ -253,6 +285,7 @@ main().catch(err => {
 
 </body>
 </html>
+
 
 
 
