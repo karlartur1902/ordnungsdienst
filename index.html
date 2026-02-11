@@ -60,11 +60,21 @@
 }
 .countdown strong { font-weight: 700; }
 .small { font-size: 0.9rem; color: #555; }
+.announce {
+  border-color: #ffd66b;
+  background: #fff9e6;
+}
+.announce h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+.announce ul { margin: 8px 0 0 20px; }
 
   </style>
 </head>
 <body>
-  <h1>📋 Ordnungsdienst</h1>
+  <h1>📋 Klasseninfos 8A</h1>
+<div class="card" id="announceCard" style="display:none"></div>
 
   <div class="card" id="dienstCard">Lade…</div>
 
@@ -153,6 +163,8 @@ async function main() {
   let d;
   try {
     d = JSON.parse(text);
+    
+
   } catch {
     dienstCard.innerHTML = `<div class="err">Fehler: Server hat kein JSON geliefert.</div>
       <div class="muted" style="margin-top:8px">Anfang der Antwort:</div>
@@ -161,6 +173,18 @@ async function main() {
     setStatusPill(statusPill, "warn");
     return;
   }
+const announceCard = document.getElementById("announceCard");
+const anns = d.ankuendigungen || [];
+
+if (anns.length > 0) {
+  announceCard.style.display = "block";
+  announceCard.className = "card announce";
+  announceCard.innerHTML =
+    `<h2>📣 Wichtige Ankündigungen</h2>` +
+    `<ul>${anns.map(a => `<li><b>${a.text}</b></li>`).join("")}</ul>`;
+} else {
+  announceCard.style.display = "none";
+}
 
   if (d.error) {
     dienstCard.innerHTML = `<div class="err">Fehler im Script:</div><div class="muted">${d.error}</div>`;
@@ -229,6 +253,7 @@ main().catch(err => {
 
 </body>
 </html>
+
 
 
 
