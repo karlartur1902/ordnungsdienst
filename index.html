@@ -85,17 +85,21 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwWVzsQsEIX-iImcrQK7XU8XqC1WCB2503ZWslhrpnVcGD5Ip2B4jUN03LDH7M5qa6qRw/exec";
 
-// "2026-02-09" -> "Mo 9.2.26"
+// ISO "YYYY-MM-DD" -> Date
+function parseISODate(iso) {
+  return new Date(iso + "T00:00:00");
+}
+
+// "YYYY-MM-DD" -> "Mo 23.2.26"
 function formatShortDate(isoDate) {
-  const d = new Date(isoDate + "T00:00:00");
-  const wd = d.toLocaleDateString("de-DE", { weekday: "short" }); // "Mo."
+  const d = parseISODate(isoDate);
+  const wd = d.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "");
   const rest = d.toLocaleDateString("de-DE", { day: "numeric", month: "numeric", year: "2-digit" });
-  return `${wd.replace(".", "")} ${rest}`; // "Mo 9.2.26"
+  return `${wd} ${rest}`;
 }
 
 // ISO oder Date-String -> "Montag 9.2.26"
 function formatLongDate(value) {
-  // robust: wenn ISO vorhanden, nutze es
   const s = String(value);
   const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
   const d = m ? new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00`) : new Date(value);
@@ -103,11 +107,7 @@ function formatLongDate(value) {
 
   const weekday = d.toLocaleDateString("de-DE", { weekday: "long" });
   const rest = d.toLocaleDateString("de-DE", { day: "numeric", month: "numeric", year: "2-digit" });
-  return `${weekday} ${rest}`; // ohne Komma
-}
-function parseISODate(iso) {
-  // iso: "YYYY-MM-DD"
-  return new Date(iso + "T00:00:00");
+  return `${weekday} ${rest}`;
 }
 
 function daysUntil(iso) {
@@ -116,13 +116,6 @@ function daysUntil(iso) {
   const d = parseISODate(iso);
   const diff = d.getTime() - t0.getTime();
   return Math.round(diff / (1000 * 60 * 60 * 24));
-}
-
-function formatShortDate(isoDate) {
-  const d = parseISODate(isoDate);
-  const wd = d.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "");
-  const rest = d.toLocaleDateString("de-DE", { day: "numeric", month: "numeric", year: "2-digit" });
-  return `${wd} ${rest}`;
 }
 
 function renderTable(containerId, items, headers, rowHtml, emptyText) {
@@ -143,20 +136,15 @@ function renderTable(containerId, items, headers, rowHtml, emptyText) {
   `;
 }
 
-function renderList(containerId, items, emptyText, mapper) {
-  const el = document.getElementById(containerId);
-  if (!items || items.length === 0) {
-    el.innerHTML = `<div class="muted">${emptyText}</div>`;
-    return;
-  }
-  el.innerHTML = `<ul>${items.map(mapper).join("")}</ul>`;
+function setStatusPill(pill, state) {
+  // state: "ok" | "neutral" | "warn"
+  pill.className = "pill badge " + (state === "ok" ? "badge-ok" : state === "warn" ? "badge-warn" : "badge-neutral");
 }
 
 async function main() {
   const dienstCard = document.getElementById("dienstCard");
   const statusPill = document.getElementById("statusPill");
 
-  // Cache-Buster
   const url = API_URL + (API_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
 
   const r = await fetch(url, { cache: "no-store", redirect: "follow" });
@@ -170,72 +158,78 @@ async function main() {
       <div class="muted" style="margin-top:8px">Anfang der Antwort:</div>
       <pre style="white-space:pre-wrap">${text.slice(0, 400).replaceAll("<","&lt;")}</pre>`;
     statusPill.textContent = "Fehler";
+    setStatusPill(statusPill, "warn");
     return;
   }
 
   if (d.error) {
     dienstCard.innerHTML = `<div class="err">Fehler im Script:</div><div class="muted">${d.error}</div>`;
     statusPill.textContent = "Fehler";
+    setStatusPill(statusPill, "warn");
   } else if (!d.ordnungsdienst || d.ordnungsdienst.length === 0) {
     dienstCard.innerHTML = `<b>${d.kw ?? ""}</b><div class="muted" style="margin-top:6px">Kein Ordnungsdienst (Ferien / keine Schulwoche).</div>`;
     statusPill.textContent = "Ferien/leer";
+    setStatusPill(statusPill, "neutral");
   } else {
-    const start = formatLongDate(d.monday); // "Montag 9.2.26"
+    const start = formatLongDate(d.monday);
     dienstCard.innerHTML =
       `<div><b>${d.kw}</b></div>
        <div>ab <b>${start}</b></div>
        <ol>${d.ordnungsdienst.map(n => `<li><b>${n}</b></li>`).join("")}</ol>
        <div class="muted" style="margin-top:10px">Diese Einteilung gilt für die ganze Woche.</div>`;
     statusPill.textContent = "Aktuell";
+    setStatusPill(statusPill, "ok");
   }
 
- // Termine-Tabelle
-renderTable(
-  "termineOut",
-  d.termine,
-  ["Datum", "Termin", "Info"],
-  (it) => `
-    <tr>
-      <td class="date"><b>${formatShortDate(it.date)}</b></td>
-      <td>${it.a || ""}</td>
-      <td class="info">${it.b ? it.b : ""}</td>
-    </tr>
-  `,
-  "Keine Termine eingetragen."
-);
-
-// Klassenarbeiten-Tabelle + Countdown
-renderTable(
-  "kaOut",
-  d.klassenarbeiten,
-  ["Datum", "Fach", "Thema"],
-  (it) => {
-    const left = daysUntil(it.date);
-    const cd = left === 0 ? "Heute" : (left === 1 ? "Morgen" : `in ${left} Tagen`);
-    return `
+  // Termine (Tabelle)
+  renderTable(
+    "termineOut",
+    d.termine,
+    ["Datum", "Termin", "Info"],
+    (it) => `
       <tr>
         <td class="date"><b>${formatShortDate(it.date)}</b></td>
         <td>${it.a || ""}</td>
-        <td class="info">
-          ${it.b ? it.b : ""}
-          <div class="small">⏳ ${cd}</div>
-        </td>
+        <td class="info">${it.b ? it.b : ""}</td>
       </tr>
-    `;
-  },
-  "Keine Klassenarbeiten eingetragen."
-);
+    `,
+    "Keine Termine eingetragen."
+  );
 
+  // Klassenarbeiten (Tabelle + Countdown)
+  renderTable(
+    "kaOut",
+    d.klassenarbeiten,
+    ["Datum", "Fach", "Thema"],
+    (it) => {
+      const left = daysUntil(it.date);
+      const cd = left === 0 ? "Heute" : (left === 1 ? "Morgen" : `in ${left} Tagen`);
+      return `
+        <tr>
+          <td class="date"><b>${formatShortDate(it.date)}</b></td>
+          <td>${it.a || ""}</td>
+          <td class="info">
+            ${it.b ? it.b : ""}
+            <div class="small">⏳ ${cd}</div>
+          </td>
+        </tr>
+      `;
+    },
+    "Keine Klassenarbeiten eingetragen."
+  );
 }
 
 main().catch(err => {
   document.getElementById("dienstCard").innerHTML = `<div class="err">Fehler beim Laden:</div><div class="muted">${err.message}</div>`;
-  document.getElementById("statusPill").textContent = "Fehler";
+  const pill = document.getElementById("statusPill");
+  pill.textContent = "Fehler";
+  pill.className = "pill badge badge-warn";
 });
 </script>
 
 </body>
 </html>
+
 
 
 
