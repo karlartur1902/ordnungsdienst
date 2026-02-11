@@ -15,6 +15,52 @@
     .row{display:flex; gap:10px; flex-wrap:wrap}
     .pill{display:inline-block; padding:2px 10px; border:1px solid #ddd; border-radius:999px; font-size:0.9rem; color:#444}
     .err{color:#b00020}
+    .table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 10px;
+}
+.table th, .table td {
+  text-align: left;
+  padding: 10px 10px;
+  vertical-align: top;
+  border-top: 1px solid #eee;
+}
+.table th {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 600;
+}
+.table td.date {
+  white-space: nowrap;
+  width: 110px;
+  font-variant-numeric: tabular-nums;
+}
+.table td.info {
+  color: #555;
+}
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  border: 1px solid #ddd;
+}
+.badge-ok { background: #f1fff4; border-color: #bfe8c9; }
+.badge-warn { background: #fff6f6; border-color: #f2b8b8; }
+.badge-neutral { background: #f6f7f9; border-color: #e2e4e9; }
+
+.countdown {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #f2b8b8;
+  background: #fff6f6;
+}
+.countdown strong { font-weight: 700; }
+.small { font-size: 0.9rem; color: #555; }
+
   </style>
 </head>
 <body>
@@ -58,6 +104,43 @@ function formatLongDate(value) {
   const weekday = d.toLocaleDateString("de-DE", { weekday: "long" });
   const rest = d.toLocaleDateString("de-DE", { day: "numeric", month: "numeric", year: "2-digit" });
   return `${weekday} ${rest}`; // ohne Komma
+}
+function parseISODate(iso) {
+  // iso: "YYYY-MM-DD"
+  return new Date(iso + "T00:00:00");
+}
+
+function daysUntil(iso) {
+  const today = new Date();
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const d = parseISODate(iso);
+  const diff = d.getTime() - t0.getTime();
+  return Math.round(diff / (1000 * 60 * 60 * 24));
+}
+
+function formatShortDate(isoDate) {
+  const d = parseISODate(isoDate);
+  const wd = d.toLocaleDateString("de-DE", { weekday: "short" }).replace(".", "");
+  const rest = d.toLocaleDateString("de-DE", { day: "numeric", month: "numeric", year: "2-digit" });
+  return `${wd} ${rest}`;
+}
+
+function renderTable(containerId, items, headers, rowHtml, emptyText) {
+  const el = document.getElementById(containerId);
+  if (!items || items.length === 0) {
+    el.innerHTML = `<div class="muted">${emptyText}</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <table class="table">
+      <thead>
+        <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
+        ${items.map(rowHtml).join("")}
+      </tbody>
+    </table>
+  `;
 }
 
 function renderList(containerId, items, emptyText, mapper) {
@@ -106,21 +189,43 @@ async function main() {
     statusPill.textContent = "Aktuell";
   }
 
-  // Termine: {date, a, b} -> "Mo 9.2.26 – Titel (Info)"
-  renderList("termineOut", d.termine, "Keine Termine eingetragen.", (it) => {
-    const date = formatShortDate(it.date);
-    const title = it.a ? it.a : "";
-    const info = it.b ? ` <span class="muted">(${it.b})</span>` : "";
-    return `<li><b>${date}</b> – ${title}${info}</li>`;
-  });
+ // Termine-Tabelle
+renderTable(
+  "termineOut",
+  d.termine,
+  ["Datum", "Termin", "Info"],
+  (it) => `
+    <tr>
+      <td class="date"><b>${formatShortDate(it.date)}</b></td>
+      <td>${it.a || ""}</td>
+      <td class="info">${it.b ? it.b : ""}</td>
+    </tr>
+  `,
+  "Keine Termine eingetragen."
+);
 
-  // Klassenarbeiten: {date, a, b} -> "Mo 9.2.26 – Fach (Thema)"
-  renderList("kaOut", d.klassenarbeiten, "Keine Klassenarbeiten eingetragen.", (it) => {
-    const date = formatShortDate(it.date);
-    const fach = it.a ? it.a : "";
-    const thema = it.b ? ` <span class="muted">(${it.b})</span>` : "";
-    return `<li><b>${date}</b> – ${fach}${thema}</li>`;
-  });
+// Klassenarbeiten-Tabelle + Countdown
+renderTable(
+  "kaOut",
+  d.klassenarbeiten,
+  ["Datum", "Fach", "Thema"],
+  (it) => {
+    const left = daysUntil(it.date);
+    const cd = left === 0 ? "Heute" : (left === 1 ? "Morgen" : `in ${left} Tagen`);
+    return `
+      <tr>
+        <td class="date"><b>${formatShortDate(it.date)}</b></td>
+        <td>${it.a || ""}</td>
+        <td class="info">
+          ${it.b ? it.b : ""}
+          <div class="small">⏳ ${cd}</div>
+        </td>
+      </tr>
+    `;
+  },
+  "Keine Klassenarbeiten eingetragen."
+);
+
 }
 
 main().catch(err => {
@@ -131,5 +236,6 @@ main().catch(err => {
 
 </body>
 </html>
+
 
 
