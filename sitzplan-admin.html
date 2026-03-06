@@ -172,9 +172,9 @@ function SitzplanAdmin(){
     if(!arrangement||publishing)return;
     setPublishing(true);
     try{
+      // Kein Content-Type Header → kein CORS-Preflight → Apps Script akzeptiert den Request
       const r=await fetch(API_URL,{
         method:"POST",
-        headers:{"Content-Type":"application/json"},
         body:JSON.stringify({arrangement}),
         redirect:"follow",
       });
