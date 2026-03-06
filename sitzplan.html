@@ -106,7 +106,9 @@ function render(arrangement, savedAt) {
   // Fenster links (Schülersicht) oder rechts (Lehrersicht)
   const fensterHtml = `<div class="fenster-label"><div class="fenster-inner">🪟 FENSTER</div></div>`;
 
-  let html = `<div class="tafel">TAFEL / LEHRER</div><div class="grid-wrap">`;
+  let html = ``;
+  if (!flipped) html += `<div class="tafel">TAFEL / LEHRER</div>`;
+  html += `<div class="grid-wrap">`;
   if (!flipped) html += fensterHtml;
   html += `<div class="rows">`;
 
@@ -132,6 +134,7 @@ function render(arrangement, savedAt) {
   html += `</div>`; // rows
   if (flipped) html += fensterHtml;
   html += `</div>`; // grid-wrap
+  if (flipped) html += `<div class="tafel">TAFEL / LEHRER</div>`;
 
   if (savedAt) {
     const d = new Date(savedAt);
