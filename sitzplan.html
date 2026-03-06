@@ -49,9 +49,9 @@
       border-radius: 4px; font-size: 13px; font-weight: 600;
       background: #f0f2f7; color: #333;
     }
-    .seat.window-seat { background: #e8f2fb; color: #2a6090; border-top: 2px solid #7ab0d8; }
     .seat.empty { color: #ccc; font-weight: 400; }
     .seat + .seat { border-left: 1px solid #e8eaf0; }
+    .table-pair-window { border-left: 4px solid #5599cc !important; }
 
     .no-plan {
       text-align: center; padding: 60px 20px; color: #999;
@@ -81,17 +81,16 @@ const ROW_LABELS = ["Reihe 1 (vorne)","Reihe 2","Reihe 3","Reihe 4","Reihe 5 (hi
 function render(arrangement, savedAt) {
   document.getElementById("subtitle").textContent = "15 Tische · 27 Schüler";
   let html = `<div class="tafel">TAFEL / LEHRER</div><div class="grid-wrap">`;
-  html += `<div class="fenster-label"><div class="fenster-inner">🪟 FENSTER</div></div>`;
   html += `<div class="rows">`;
   for (let row = 0; row < 5; row++) {
     html += `<div><div class="row-label">${ROW_LABELS[row]}</div><div class="tables-row">`;
     for (let table = 0; table < 3; table++) {
-      html += `<div class="table-pair">`;
+      const isWinTable = table === 0;
+      html += `<div class="table-pair${isWinTable ? " table-pair-window" : ""}">`;
       for (let side = 0; side < 2; side++) {
         const col = table * 2 + side;
         const name = arrangement[row * 6 + col];
-        const isWin = col === 0;
-        const cls = !name ? "seat empty" : isWin ? "seat window-seat" : "seat";
+        const cls = !name ? "seat empty" : "seat";
         html += `<div class="${cls}">${name || "—"}</div>`;
       }
       html += `</div>`;
