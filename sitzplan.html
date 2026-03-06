@@ -13,95 +13,131 @@
       max-width: 780px;
       margin: 0 auto;
     }
-    .back-link {
-      display: inline-block; color: #555; font-size: 13px;
-      text-decoration: none; margin-bottom: 18px;
+    .back-link { display:inline-block; color:#555; font-size:13px; text-decoration:none; margin-bottom:18px; }
+    .back-link:hover { color:#222; }
+    .header-row { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:4px; }
+    h1 { font-size:1.3rem; }
+    .sub { color:#777; font-size:0.9rem; margin-bottom:16px; }
+    .flip-btn {
+      background:transparent; border:1px solid #bbb; border-radius:20px;
+      padding:4px 14px; font-size:12px; color:#555; cursor:pointer;
     }
-    .back-link:hover { color: #222; }
-    h1 { font-size: 1.3rem; margin-bottom: 4px; }
-    .sub { color: #777; font-size: 0.9rem; margin-bottom: 20px; }
+    .flip-btn:hover { background:#eee; }
 
     .tafel {
-      background: #2d5a27; border-radius: 8px; text-align: center;
-      padding: 8px; font-size: 12px; color: #90c080; letter-spacing: 3px;
-      margin-bottom: 14px;
+      background:#2d5a27; border-radius:8px; text-align:center;
+      padding:8px; font-size:12px; color:#90c080; letter-spacing:3px;
+      margin-bottom:14px;
     }
-    .grid-wrap { display: flex; gap: 8px; margin-bottom: 16px; }
-    .fenster-label { width: 18px; display: flex; align-items: stretch; }
-    .fenster-inner {
-      writing-mode: vertical-rl; transform: rotate(180deg);
-      font-size: 10px; color: #5599cc; letter-spacing: 2px;
-      background: #e8f0fb; border: 1px solid #b0c8ee;
-      border-radius: 6px; padding: 10px 3px; flex: 1;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .rows { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-    .row-label { font-size: 11px; color: #aaa; text-align: right; margin-bottom: 3px; }
-    .tables-row { display: flex; gap: 10px; justify-content: center; }
+    .grid-wrap { display:flex; gap:8px; margin-bottom:16px; }
+    .rows { flex:1; display:flex; flex-direction:column; gap:10px; }
+    .row-label { font-size:11px; color:#aaa; text-align:right; margin-bottom:3px; }
+    .tables-row { display:flex; gap:10px; justify-content:center; }
     .table-pair {
-      display: flex; gap: 0; flex: 1; max-width: 220px;
-      background: #fff; border: 1px solid #e0e4ec;
-      border-radius: 8px; padding: 5px 8px;
-      box-shadow: 0 1px 3px #0001;
+      display:flex; gap:0; flex:1; max-width:220px;
+      background:#fff; border:1px solid #e0e4ec;
+      border-radius:8px; padding:5px 8px;
+      box-shadow:0 1px 3px #0001;
     }
+    .table-pair-window-left  { border-left:4px solid #5599cc !important; }
+    .table-pair-window-right { border-right:4px solid #5599cc !important; }
     .seat {
-      flex: 1; text-align: center; padding: 8px 4px;
-      border-radius: 4px; font-size: 13px; font-weight: 600;
-      background: #f0f2f7; color: #333;
+      flex:1; text-align:center; padding:8px 4px;
+      border-radius:4px; font-size:13px; font-weight:600;
+      background:#f0f2f7; color:#333;
     }
-    .seat.empty { color: #ccc; font-weight: 400; }
-    .seat + .seat { border-left: 1px solid #e8eaf0; }
-    .table-pair-window { border-left: 4px solid #5599cc !important; }
+    .seat.empty { color:#ccc; font-weight:400; }
+    .seat + .seat { border-left:1px solid #e8eaf0; }
 
-    .no-plan {
-      text-align: center; padding: 60px 20px; color: #999;
+    .fenster-label { width:18px; flex-shrink:0; display:flex; align-items:stretch; }
+    .fenster-inner {
+      writing-mode:vertical-rl; transform:rotate(180deg);
+      font-size:10px; color:#5599cc; letter-spacing:2px;
+      background:#e8f0fb; border:1px solid #b0c8ee;
+      border-radius:6px; padding:10px 3px; flex:1;
+      display:flex; align-items:center; justify-content:center;
     }
-    .no-plan .icon { font-size: 3rem; margin-bottom: 12px; }
-    .updated { font-size: 11px; color: #bbb; margin-top: 14px; text-align: right; }
-    .loading { color: #aaa; font-size: 14px; text-align: center; padding: 40px; }
 
-    @media (max-width: 480px) {
-      .seat { font-size: 11px; padding: 6px 2px; }
-      .table-pair { padding: 4px 5px; }
-      .tables-row { gap: 6px; }
+    .no-plan { text-align:center; padding:60px 20px; color:#999; }
+    .no-plan .icon { font-size:3rem; margin-bottom:12px; }
+    .updated { font-size:11px; color:#bbb; margin-top:14px; text-align:right; }
+    .loading { color:#aaa; font-size:14px; text-align:center; padding:40px; }
+
+    @media (max-width:480px) {
+      .seat { font-size:11px; padding:6px 2px; }
+      .table-pair { padding:4px 5px; }
+      .tables-row { gap:6px; }
     }
   </style>
 </head>
 <body>
   <a class="back-link" href="index.html">← Klasseninfos</a>
-  <h1>🪑 Sitzplan 8A</h1>
+  <div class="header-row">
+    <h1>🪑 Sitzplan 8A</h1>
+    <button class="flip-btn" id="flipBtn" onclick="toggleFlip()" style="display:none">👁 Lehrersicht</button>
+  </div>
   <div class="sub" id="subtitle">Wird geladen…</div>
   <div id="content"><div class="loading">Lade…</div></div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxLIoQW3X4m-DHnHPFluK0uA79493EoSzO6ZNpACBaJkEE_2i0lrP4Za0aocjiegYf2gw/exec";
+const API_URL   = "https://script.google.com/macros/s/AKfycbxLIoQW3X4m-DHnHPFluK0uA79493EoSzO6ZNpACBaJkEE_2i0lrP4Za0aocjiegYf2gw/exec";
 const CACHE_KEY = "sitzplan_cache";
 const ROW_LABELS = ["Reihe 1 (vorne)","Reihe 2","Reihe 3","Reihe 4","Reihe 5 (hinten)"];
 
+let currentArrangement = null;
+let currentSavedAt = null;
+let flipped = false;
+
+function toggleFlip() {
+  flipped = !flipped;
+  document.getElementById("flipBtn").textContent = flipped ? "🎓 Schülersicht" : "👁 Lehrersicht";
+  if (currentArrangement) render(currentArrangement, currentSavedAt);
+}
+
 function render(arrangement, savedAt) {
+  currentArrangement = arrangement;
+  currentSavedAt = savedAt;
   document.getElementById("subtitle").textContent = "15 Tische · 27 Schüler";
+  document.getElementById("flipBtn").style.display = "inline-block";
+
+  const rows   = flipped ? [4,3,2,1,0] : [0,1,2,3,4];
+  const tables = flipped ? [2,1,0]     : [0,1,2];
+
+  // Fenster links (Schülersicht) oder rechts (Lehrersicht)
+  const fensterHtml = `<div class="fenster-label"><div class="fenster-inner">🪟 FENSTER</div></div>`;
+
   let html = `<div class="tafel">TAFEL / LEHRER</div><div class="grid-wrap">`;
+  if (!flipped) html += fensterHtml;
   html += `<div class="rows">`;
-  for (let row = 0; row < 5; row++) {
+
+  rows.forEach(row => {
     html += `<div><div class="row-label">${ROW_LABELS[row]}</div><div class="tables-row">`;
-    for (let table = 0; table < 3; table++) {
-      const isWinTable = table === 0;
-      html += `<div class="table-pair${isWinTable ? " table-pair-window" : ""}">`;
-      for (let side = 0; side < 2; side++) {
-        const col = table * 2 + side;
+    tables.forEach(table => {
+      const isWin = table === 0; // Tisch 0 = Fensterseite (reale Koordinate)
+      const winClass = isWin
+        ? (flipped ? " table-pair-window-right" : " table-pair-window-left")
+        : "";
+      html += `<div class="table-pair${winClass}">`;
+      const sides = flipped ? [1,0] : [0,1];
+      sides.forEach(side => {
+        const col  = table * 2 + side;
         const name = arrangement[row * 6 + col];
-        const cls = !name ? "seat empty" : "seat";
-        html += `<div class="${cls}">${name || "—"}</div>`;
-      }
+        html += `<div class="${name ? "seat" : "seat empty"}">${name || "—"}</div>`;
+      });
       html += `</div>`;
-    }
+    });
     html += `</div></div>`;
-  }
-  html += `</div></div>`;
+  });
+
+  html += `</div>`; // rows
+  if (flipped) html += fensterHtml;
+  html += `</div>`; // grid-wrap
+
   if (savedAt) {
     const d = new Date(savedAt);
     html += `<div class="updated">Stand: ${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})} Uhr</div>`;
   }
+
   document.getElementById("content").innerHTML = html;
 }
 
@@ -127,9 +163,8 @@ async function main() {
   // Dann frisch von API laden
   try {
     const url = API_URL + "?t=" + Date.now();
-    const r = await fetch(url, { cache: "no-store", redirect: "follow" });
+    const r = await fetch(url, { cache:"no-store", redirect:"follow" });
     const d = JSON.parse(await r.text());
-
     if (d.sitzplan && d.sitzplan.arrangement) {
       localStorage.setItem(CACHE_KEY, JSON.stringify(d.sitzplan));
       render(d.sitzplan.arrangement, d.sitzplan.savedAt);
