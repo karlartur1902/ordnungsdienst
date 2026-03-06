@@ -270,7 +270,10 @@ function SitzplanAdmin(){
                 <div style={{fontSize:11,color:"#555",marginBottom:3,textAlign:"right"}}>{ROW_LABELS[row]}</div>
                 <div style={{display:"flex",gap:12,justifyContent:"center"}}>
                   {(flipped?[2,1,0]:[0,1,2]).map(table=>(
-                    <div key={table} style={{display:"flex",gap:2,background:"#16213e",border:"1px solid #2a3a5e",borderRadius:6,padding:"5px 8px",flex:1,maxWidth:220}}>
+                    <div key={table} style={{display:"flex",gap:2,background:"#16213e",
+                      border:"1px solid #2a3a5e",
+                      borderLeft: (!flipped && table===0) || (flipped && table===2) ? "4px solid #5599cc" : "1px solid #2a3a5e",
+                      borderRadius:6,padding:"5px 8px",flex:1,maxWidth:220}}>
                       {(flipped?[1,0]:[0,1]).map(side=>{
                         const col=table*2+side,name=studentAt(row,col),realIdx=row*6+col;
                         const banN=getBanNeighbors(realIdx);
@@ -293,10 +296,9 @@ function SitzplanAdmin(){
                             style={{flex:1,textAlign:"center",padding:"7px 3px",borderRadius:4,cursor:"grab",
                               userSelect:"none",fontSize:12,transition:"background 0.1s",
                               borderLeft:side===1?"1px solid #2a3a5e":"none",
-                              borderTop:isWin?"2px solid #3366aa":"none",
                               opacity:isDrag?0.4:1,
-                              background:isDrag?"#c9a84c22":atinaWin||hasBan?"#5a1a1a":hasNeg?"#3a2a1a":hasPos?"#1a3a1a":isWin?"#0d2236":"#0d1929",
-                              color:atinaWin||hasBan?"#ff6b6b":hasNeg?"#ffaa55":hasPos?"#66cc66":isWin?"#88bbdd":"#c8c0b0",
+                              background:isDrag?"#c9a84c22":atinaWin||hasBan?"#5a1a1a":hasNeg?"#3a2a1a":hasPos?"#1a3a1a":"#0d1929",
+                              color:atinaWin||hasBan?"#ff6b6b":hasNeg?"#ffaa55":hasPos?"#66cc66":"#c8c0b0",
                             }}
                           >{name}</div>
                         );
