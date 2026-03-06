@@ -29,7 +29,7 @@ const { useState, useCallback, useEffect } = React;
 const API_URL  = "https://script.google.com/macros/s/AKfycbxLIoQW3X4m-DHnHPFluK0uA79493EoSzO6ZNpACBaJkEE_2i0lrP4Za0aocjiegYf2gw/exec";
 // PIN als SHA-256-Hash. Standard: "1234"
 // Zum Ändern: https://emn178.github.io/online-tools/sha256.html → Hash hier eintragen
-const PIN_HASH = "4030c42b313a82b953d14f04a85ff9dd9739e49a97d90631b7fb3029cca1d6e1";
+const PIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
 async function hashPin(pin) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pin));
@@ -258,7 +258,7 @@ function SitzplanAdmin(){
       {arrangement&&(<>
         {!flipped&&<TafelBar/>}
 
-        <div style={{maxWidth:780,margin:"0 auto 20px",display:"flex",gap:8}}>
+        <div style={{maxWidth:780,margin:"0 auto 20px",display:"flex",gap:8,flexDirection:flipped?"row-reverse":"row"}}>
           {/* Fenster */}
           <div style={{width:20,display:"flex",alignItems:"stretch"}}>
             <div style={{writingMode:"vertical-rl",transform:"rotate(180deg)",fontSize:10,color:"#5599cc",letterSpacing:2,background:"#0d2040",border:"1px solid #3366aa",borderRadius:6,padding:"10px 3px",flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}>🪟 FENSTER</div>
@@ -272,7 +272,8 @@ function SitzplanAdmin(){
                   {(flipped?[2,1,0]:[0,1,2]).map(table=>(
                     <div key={table} style={{display:"flex",gap:2,background:"#16213e",
                       border:"1px solid #2a3a5e",
-                      borderLeft: (!flipped && table===0) || (flipped && table===2) ? "4px solid #5599cc" : "1px solid #2a3a5e",
+                      borderLeft: (!flipped && table===0) ? "4px solid #5599cc" : "1px solid #2a3a5e",
+                      borderRight: (flipped && table===0) ? "4px solid #5599cc" : "1px solid #2a3a5e",
                       borderRadius:6,padding:"5px 8px",flex:1,maxWidth:220}}>
                       {(flipped?[1,0]:[0,1]).map(side=>{
                         const col=table*2+side,name=studentAt(row,col),realIdx=row*6+col;
