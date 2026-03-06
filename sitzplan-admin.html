@@ -29,7 +29,7 @@ const { useState, useCallback, useEffect } = React;
 const API_URL  = "https://script.google.com/macros/s/AKfycbxLIoQW3X4m-DHnHPFluK0uA79493EoSzO6ZNpACBaJkEE_2i0lrP4Za0aocjiegYf2gw/exec";
 // PIN als SHA-256-Hash. Standard: "1234"
 // Zum Ändern: https://emn178.github.io/online-tools/sha256.html → Hash hier eintragen
-const PIN_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+const PIN_HASH = "4030c42b313a82b953d14f04a85ff9dd9739e49a97d90631b7fb3029cca1d6e1";
 
 async function hashPin(pin) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pin));
